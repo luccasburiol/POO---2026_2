@@ -46,7 +46,7 @@ public class Perfil {
     public boolean equals(Object o) {
          // TODO (Passo 1)
         if(this == o) return true;
-        if(o instaceof Perfil){
+        if(o instanceof Perfil){
             Perfil outro = (Perfil) o;
             return this.handle.equals(outro.handle);
         } else {
