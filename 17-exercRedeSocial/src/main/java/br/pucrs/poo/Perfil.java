@@ -13,11 +13,11 @@ import java.util.TreeSet;
  * em que deve ser implementado. Os corpos atuais são apenas provisórios,
  * para que o projeto compile desde o início.
  */
-public class Perfil {
+public class Perfil implements Comparable<Perfil>{
 
-    private final String handle;   // ex.: "@ana" — único na rede
+    private final String handle; // ex.: "@ana" — único na rede
     private final String nome;
-    private final Set<Perfil> seguindo   = new HashSet<>();
+    private final Set<Perfil> seguindo = new HashSet<>();
     private final Set<Perfil> seguidores = new HashSet<>();
 
     public Perfil(String handle, String nome) {
@@ -44,9 +44,10 @@ public class Perfil {
 
     @Override
     public boolean equals(Object o) {
-         // TODO (Passo 1)
-        if(this == o) return true;
-        if(o instanceof Perfil){
+        // TODO (Passo 1)
+        if (this == o)
+            return true;
+        if (o instanceof Perfil) {
             Perfil outro = (Perfil) o;
             return this.handle.equals(outro.handle);
         } else {
@@ -56,8 +57,8 @@ public class Perfil {
 
     @Override
     public int hashCode() {
-         // TODO (Passo 1)
-         return handle.hashCode();
+        // TODO (Passo 1)
+        return handle.hashCode();
     }
 
     @Override
@@ -72,12 +73,16 @@ public class Perfil {
 
     /**
      * Faz este perfil seguir o outro, atualizando os DOIS lados da relação.
+     *
      * @return true se a relação foi criada; false se já existia
      *         ou se o perfil tentou seguir a si mesmo.
      */
     public boolean seguir(Perfil outro) {
         // TODO (Passo 2): use o retorno de seguindo.add(...)
-        return false;
+        if (outro.equals(this)) return false;
+        boolean novo = seguindo.add(outro);
+        if (novo) outro.seguidores.add(this);
+        return novo;
     }
 
     /**
@@ -86,7 +91,9 @@ public class Perfil {
      */
     public boolean deixarDeSeguir(Perfil outro) {
         // TODO (Passo 2): use o retorno de seguindo.remove(...)
-        return false;
+        boolean existia = seguindo.remove(outro);
+        if (existia) outro.seguidores.remove(this);
+        return existia;
     }
 
     // ------------------------------------------------------------------
@@ -95,12 +102,12 @@ public class Perfil {
 
     public Set<Perfil> getSeguindo() {
         // TODO (Passo 3): devolva uma visão somente leitura ou uma cópia
-        return seguindo;
+        return Collections.ummodifiableSet(seguindo);
     }
 
     public Set<Perfil> getSeguidores() {
         // TODO (Passo 3): devolva uma visão somente leitura ou uma cópia
-        return seguidores;
+        return Collections.ummodifiableSet(seguidores);
     }
 
     // ------------------------------------------------------------------
@@ -112,19 +119,25 @@ public class Perfil {
     /** Quem eu sigo e também me segue (seguindo ∩ seguidores). */
     public Set<Perfil> mutuos() {
         // TODO (Passo 4)
-        return new HashSet<>();
+        Set<Perfil> r = new TreeSet<>(seguindo);
+        r.retainAll(seguidores);
+        return r;
     }
 
     /** Quem eu sigo e não me segue (seguindo − seguidores). */
     public Set<Perfil> naoMeSegueDeVolta() {
         // TODO (Passo 4)
-        return new HashSet<>();
+        Set<Perfil> r = new TreeSet<>(seguindo);
+        r.removeAll(seguidores);
+        return r;
     }
 
     /** Quem me segue e eu não sigo (seguidores − seguindo). */
     public Set<Perfil> fas() {
         // TODO (Passo 4)
-        return new HashSet<>();
+        Set<Perfil> r = new TreeSet<>(seguidores);
+        r.removeAll(outro.seguindo);
+        return r;
     }
 
     // ------------------------------------------------------------------
@@ -134,7 +147,9 @@ public class Perfil {
     /** Perfis seguidos tanto por este perfil quanto pelo outro. */
     public Set<Perfil> seguidosEmComum(Perfil outro) {
         // TODO (Passo 5): lembre que você pode acessar outro.seguindo
-        return new HashSet<>();
+        Set<Perfil> r = new TreeSet<>(seguindo);
+        r.retainAll(outro.seguindo);
+        return r;
     }
 
     // ------------------------------------------------------------------
@@ -144,7 +159,12 @@ public class Perfil {
     /** Pessoas seguidas por quem eu sigo, menos eu mesmo e quem já sigo. */
     public Set<Perfil> sugestoes() {
         // TODO (Passo 6): união -> remover a si mesmo -> remover quem já sigo
-        return new HashSet<>();
+        Set<Perfil> r = new TreeSet<>();
+        for (Perfil p : seguindo)
+            r.addAll(p.seguindo);
+        r.remove(this);
+        r.removeAll(seguindo);
+        return r;
     }
 
     // ------------------------------------------------------------------
@@ -154,5 +174,8 @@ public class Perfil {
     // escreva o compareTo (comparando handles) e troque, nos métodos dos
     // Passos 4 a 6, "new HashSet<>" por "new TreeSet<>".
     //
-    // public int compareTo(Perfil outro) { ... }
+    @Override
+    public int compareTo(Perfil outro) {
+        return handle.compareTo(outro.handle);
+    }
 }
